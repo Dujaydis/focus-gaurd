@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#667eea">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="description" content="Focus Guard Todo List - Stay productive">
+
+  <title>Focus Guard Todos</title>
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    :root {
+      --primary: #667eea;
+      --primary-dark: #5568d3;
+      --success: #34c759;
+      --danger: #ff3b30;
+      --bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --card-bg: rgba(255, 255, 255, 0.15);
+      --text: white;
+      --text-muted: rgba(255, 255, 255, 0.7);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      color: var(--text);
+      padding: 0;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      padding-top: max(20px, env(safe-area-inset-top));
+    }
+
+    /* Login Screen */
+    .login-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 80vh;
+      text-align: center;
+    }
+
+    .login-screen.hidden {
+      display: none;
+    }
+
+    .login-icon {
+      font-size: 80px;
+      margin-bottom: 24px;
+    }
+
+    .login-title {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .login-subtitle {
+      font-size: 16px;
+      opacity: 0.9;
+      margin-bottom: 32px;
+    }
+
+    .login-input {
+      width: 100%;
+      max-width: 300px;
+      padding: 16px 20px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 12px;
+      font-size: 16px;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .login-input::placeholder {
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .login-input:focus {
+      outline: none;
+      border-color: rgba(255, 255, 255, 0.6);
+    }
+
+    .login-btn {
+      width: 100%;
+      max-width: 300px;
+      padding: 16px 32px;
+      background: white;
+      color: var(--primary);
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    }
+
+    .login-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .login-error {
+      color: #ff6b6b;
+      font-size: 14px;
+      margin-top: 16px;
+    }
+
+    /* App Screen */
+    .app-screen {
+      display: none;
+    }
+
+    .app-screen.active {
+      display: block;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-icon {
+      font-size: 32px;
+    }
+
+    .header-title {
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .sync-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      opacity: 0.8;
+    }
+
+    .sync-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+    }
+
+    .sync-dot.syncing {
+      animation: pulse 1s infinite;
+    }
+
+    .sync-dot.offline {
+      background: var(--danger);
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .logout-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    /* Todo Input */
+    .todo-input-section {
+      background: var(--card-bg);
+      padding: 20px;
+      border-radius: 16px;
+      margin-bottom: 20px;
+      backdrop-filter: blur(10px);
+    }
+
+    .todo-input-container {
+      display: flex;
+      gap: 10px;
+    }
+
+    .todo-input {
+      flex: 1;
+      padding: 14px 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 12px;
+      font-size: 16px;
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+      resize: none;
+      min-height: 50px;
+      max-height: 120px;
+    }
+
+    .todo-input::placeholder {
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .todo-input:focus {
+      outline: none;
+      border-color: rgba(255, 255, 255, 0.6);
+    }
+
+    .add-btn {
+      padding: 14px 24px;
+      background: white;
+      color: var(--primary);
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .add-btn:active {
+      transform: scale(0.98);
+    }
+
+    /* View Toggle */
+    .view-toggle {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .view-btn {
+      flex: 1;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: rgba(255, 255, 255, 0.7);
+      border-radius: 10px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .view-btn.active {
+      background: rgba(255, 255, 255, 0.25);
+      color: white;
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    /* Todo List */
+    .todo-list {
+      list-style: none;
+    }
+
+    .todo-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 16px;
+      background: var(--card-bg);
+      border-radius: 12px;
+      margin-bottom: 10px;
+      backdrop-filter: blur(10px);
+      transition: all 0.2s ease;
+    }
+
+    .todo-item.completed {
+      opacity: 0.6;
+    }
+
+    .todo-item.completed .todo-text {
+      text-decoration: line-through;
+    }
+
+    .todo-checkbox {
+      width: 28px;
+      height: 28px;
+      border: 2px solid rgba(255, 255, 255, 0.5);
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+    }
+
+    .todo-checkbox:active {
+      transform: scale(0.9);
+    }
+
+    .todo-checkbox.checked {
+      background: var(--success);
+      border-color: var(--success);
+    }
+
+    .todo-checkbox.checked::after {
+      content: "✓";
+      color: white;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .todo-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .todo-text {
+      font-size: 16px;
+      line-height: 1.5;
+      word-break: break-word;
+      white-space: pre-wrap;
+    }
+
+    .todo-meta {
+      font-size: 12px;
+      opacity: 0.6;
+      margin-top: 4px;
+    }
+
+    .todo-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .todo-action-btn {
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 20px;
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .todo-action-btn:hover {
+      color: white;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .todo-action-btn.delete:hover {
+      color: var(--danger);
+    }
+
+    /* Edit Mode */
+    .todo-item.editing .todo-text {
+      display: none;
+    }
+
+    .todo-edit-input {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid rgba(255, 255, 255, 0.5);
+      border-radius: 8px;
+      font-size: 16px;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      resize: none;
+      min-height: 40px;
+    }
+
+    .todo-edit-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .edit-btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .edit-btn.save {
+      background: var(--success);
+      color: white;
+    }
+
+    .edit-btn.cancel {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      opacity: 0.8;
+    }
+
+    .empty-state-icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+    }
+
+    .empty-state-text {
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+
+    .empty-state-subtext {
+      font-size: 14px;
+      opacity: 0.7;
+    }
+
+    /* Loading */
+    .loading-spinner {
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    .loading-overlay.hidden {
+      display: none;
+    }
+
+    /* Stats Bar */
+    .stats-bar {
+      display: flex;
+      justify-content: space-around;
+      background: var(--card-bg);
+      padding: 16px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      backdrop-filter: blur(10px);
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      opacity: 0.8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Responsive */
+    @media (max-width: 400px) {
+      .container {
+        padding: 16px;
+      }
+
+      .header-title {
+        font-size: 20px;
+      }
+
+      .todo-input-container {
+        flex-direction: column;
+      }
+
+      .add-btn {
+        width: 100%;
+      }
+    }
+
+    /* Pull to refresh indicator */
+    .pull-indicator {
+      text-align: center;
+      padding: 10px;
+      font-size: 14px;
+      opacity: 0.7;
+      display: none;
+    }
+
+    .pull-indicator.visible {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading Overlay -->
+  <div class="loading-overlay hidden" id="loadingOverlay">
+    <div class="loading-spinner"></div>
+  </div>
+
+  <!-- Login Screen -->
+  <div class="login-screen" id="loginScreen">
+    <div class="login-icon">🛡️</div>
+    <h1 class="login-title">Focus Guard</h1>
+    <p class="login-subtitle">Enter your passphrase to sync todos</p>
+
+    <input
+      type="password"
+      class="login-input"
+      id="passphraseInput"
+      placeholder="Enter passphrase"
+      autocomplete="off"
+    >
+
+    <button class="login-btn" id="loginBtn">Connect</button>
+
+    <p class="login-error" id="loginError"></p>
+  </div>
+
+  <!-- App Screen -->
+  <div class="app-screen" id="appScreen">
+    <div class="container">
+      <!-- Header -->
+      <div class="header">
+        <div class="header-left">
+          <span class="header-icon">🛡️</span>
+          <h1 class="header-title">Focus Guard</h1>
+        </div>
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div class="sync-status">
+            <div class="sync-dot" id="syncDot"></div>
+            <span id="syncText">Synced</span>
+          </div>
+          <button class="logout-btn" id="logoutBtn">Logout</button>
+        </div>
+      </div>
+
+      <!-- Stats Bar -->
+      <div class="stats-bar">
+        <div class="stat-item">
+          <div class="stat-value" id="totalTodos">0</div>
+          <div class="stat-label">Total</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="activeTodos">0</div>
+          <div class="stat-label">Active</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="completedTodos">0</div>
+          <div class="stat-label">Done</div>
+        </div>
+      </div>
+
+      <!-- Todo Input -->
+      <div class="todo-input-section">
+        <div class="todo-input-container">
+          <textarea
+            class="todo-input"
+            id="todoInput"
+            placeholder="What should you be working on?"
+            rows="1"
+          ></textarea>
+          <button class="add-btn" id="addBtn">Add</button>
+        </div>
+      </div>
+
+      <!-- View Toggle -->
+      <div class="view-toggle">
+        <button class="view-btn active" data-view="active">📋 Active</button>
+        <button class="view-btn" data-view="completed">✅ Completed</button>
+        <button class="view-btn" data-view="all">📑 All</button>
+      </div>
+
+      <!-- Pull to refresh indicator -->
+      <div class="pull-indicator" id="pullIndicator">↓ Pull to refresh</div>
+
+      <!-- Todo List -->
+      <ul class="todo-list" id="todoList"></ul>
+
+      <!-- Empty State -->
+      <div class="empty-state" id="emptyState" style="display: none;">
+        <div class="empty-state-icon">✨</div>
+        <div class="empty-state-text">No tasks yet</div>
+        <div class="empty-state-subtext">Add a task to get started!</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

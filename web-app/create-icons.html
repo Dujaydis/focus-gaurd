@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Generate PWA Icons</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      text-align: center;
+    }
+    canvas {
+      border: 1px solid #ccc;
+      margin: 10px;
+    }
+    a {
+      display: inline-block;
+      margin: 10px;
+      padding: 10px 20px;
+      background: #667eea;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>PWA Icon Generator</h1>
+  <p>Right-click each canvas and "Save image as..." with the filename shown</p>
+
+  <h3>icon-192.png</h3>
+  <canvas id="icon192" width="192" height="192"></canvas>
+  <br>
+  <a id="download192" download="icon-192.png">Download icon-192.png</a>
+
+  <h3>icon-512.png</h3>
+  <canvas id="icon512" width="512" height="512"></canvas>
+  <br>
+  <a id="download512" download="icon-512.png">Download icon-512.png</a>
+
+  <script>
+    function drawIcon(canvas, size) {
+      const ctx = canvas.getContext('2d');
+
+      // Background gradient
+      const gradient = ctx.createLinearGradient(0, 0, size, size);
+      gradient.addColorStop(0, '#667eea');
+      gradient.addColorStop(1, '#764ba2');
+
+      // Draw rounded rectangle background
+      const radius = size * 0.2;
+      ctx.beginPath();
+      ctx.roundRect(0, 0, size, size, radius);
+      ctx.fillStyle = gradient;
+      ctx.fill();
+
+      // Draw shield emoji
+      ctx.font = `${size * 0.5}px Arial`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('🛡️', size/2, size/2);
+    }
+
+    // Draw icons
+    const canvas192 = document.getElementById('icon192');
+    const canvas512 = document.getElementById('icon512');
+
+    drawIcon(canvas192, 192);
+    drawIcon(canvas512, 512);
+
+    // Set download links
+    document.getElementById('download192').href = canvas192.toDataURL('image/png');
+    document.getElementById('download512').href = canvas512.toDataURL('image/png');
+  </script>
+</body>
+</html>
