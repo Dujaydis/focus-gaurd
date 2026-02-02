@@ -1,0 +1,48 @@
+{
+  "manifest_version": 3,
+  "name": "Focus Guard",
+  "version": "2.0.0",
+  "description": "A minimal productivity tool to block distracting websites with advanced productivity features",
+  "permissions": [
+    "storage",
+    "tabs",
+    "webNavigation",
+    "contextMenus",
+    "notifications"
+  ],
+  "commands": {
+    "block-current-site": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+B",
+        "mac": "Command+Shift+B"
+      },
+      "description": "Block current site"
+    }
+  },
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "options_page": "options.html",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["blocked.html"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

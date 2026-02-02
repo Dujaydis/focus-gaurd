@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Focus Guard</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      width: 380px;
+      min-height: 400px;
+      max-height: 600px;
+    }
+    
+    .popup-header {
+      padding: 20px 20px 16px;
+      border-bottom: 1px solid #f5f5f7;
+    }
+    
+    .popup-content {
+      padding: 16px 20px;
+      max-height: 450px;
+      overflow-y: auto;
+    }
+    
+    .add-site-form {
+      margin-bottom: 20px;
+    }
+    
+    .form-group {
+      margin-bottom: 12px;
+    }
+    
+    .blocklist-empty {
+      text-align: center;
+      padding: 40px 20px;
+      color: #86868b;
+    }
+    
+    .quick-stats {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 16px;
+      border-radius: 10px;
+      margin-bottom: 16px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      text-align: center;
+    }
+    
+    .quick-stat-item {
+      flex: 1;
+    }
+    
+    .quick-stat-value {
+      font-size: 20px;
+      font-weight: 700;
+    }
+    
+    .quick-stat-label {
+      font-size: 10px;
+      opacity: 0.9;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 4px;
+    }
+    
+    .footer-link {
+      padding: 12px 20px;
+      text-align: center;
+      border-top: 1px solid #f5f5f7;
+      background: #f5f5f7;
+    }
+    
+    .footer-link a {
+      color: #0071e3;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    
+    .footer-link a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="popup-header">
+    <h1>Focus Guard</h1>
+    <p class="text-muted text-small" style="margin: 0;">Stay productive, stay focused</p>
+  </div>
+  
+  <div class="popup-content">
+    <!-- Quick Stats -->
+    <div class="quick-stats">
+      <div class="quick-stat-item">
+        <div class="quick-stat-value" id="totalBlocks">0</div>
+        <div class="quick-stat-label">Blocks Today</div>
+      </div>
+      <div class="quick-stat-item">
+        <div class="quick-stat-value" id="productivityScore">0</div>
+        <div class="quick-stat-label">Score</div>
+      </div>
+      <div class="quick-stat-item">
+        <div class="quick-stat-value" id="currentStreak">0</div>
+        <div class="quick-stat-label">Day Streak</div>
+      </div>
+    </div>
+    
+    <!-- Add Site Form -->
+    <div class="add-site-form">
+      <h3>Block New Site</h3>
+      <div class="form-group">
+        <input 
+          type="text" 
+          id="urlInput" 
+          placeholder="e.g., facebook.com or *.youtube.com"
+          autocomplete="off"
+        >
+      </div>
+      <button class="btn-primary" id="addButton" style="width: 100%;">Add to Blocklist</button>
+    </div>
+    
+    <!-- Blocklist -->
+    <div class="blocklist-section">
+      <div class="flex flex-between flex-center mb-16">
+        <h3 style="margin: 0;">Blocked Sites</h3>
+        <button class="btn-secondary btn-small" id="clearAllButton">Clear All</button>
+      </div>
+      
+      <ul class="list" id="blocklist"></ul>
+      
+      <div class="blocklist-empty" id="emptyState" style="display: none;">
+        <div style="font-size: 48px; margin-bottom: 12px;">🎯</div>
+        <div>No sites blocked yet</div>
+        <div class="text-small text-muted">Add websites above to start blocking distractions</div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="footer-link">
+    <a href="#" id="openOptions">Advanced Settings & Statistics</a>
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>

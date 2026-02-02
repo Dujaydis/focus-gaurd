@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Site Blocked - Focus Guard</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      padding: 20px;
+    }
+    
+    body.morning {
+      background: linear-gradient(135deg, #FDB99B 0%, #F77062 50%, #C83E73 100%);
+    }
+    
+    body.afternoon {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    body.evening {
+      background: linear-gradient(135deg, #2E3192 0%, #1BFFFF 100%);
+    }
+    
+    .container {
+      max-width: 1000px;
+      text-align: center;
+    }
+
+    /* Header row with title and blocked URL side by side */
+    .header-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .header-row h1 {
+      margin-bottom: 0;
+    }
+
+    /* Main content row with stats (left) and todo (right) side by side */
+    .main-content-row {
+      display: flex;
+      gap: 24px;
+      margin: 32px 0;
+      align-items: flex-start;
+    }
+
+    .left-column {
+      flex: 1;
+      min-width: 280px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .main-content-row .stats {
+      margin-bottom: 0;
+    }
+
+    .main-content-row .pause-indicator {
+      margin-top: 0;
+    }
+
+    .main-content-row .todo-section {
+      flex: 1.5;
+      min-width: 320px;
+      margin-top: 0;
+    }
+
+    @media (max-width: 768px) {
+      .header-row {
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .main-content-row {
+        flex-direction: column;
+      }
+
+      .left-column,
+      .main-content-row .todo-section {
+        min-width: 100%;
+      }
+    }
+    
+    .icon {
+      font-size: 120px;
+      margin-bottom: 24px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    
+    h1 {
+      font-size: 48px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+    
+    .blocked-url {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: 500;
+      word-break: break-all;
+      backdrop-filter: blur(10px);
+    }
+    
+    .message {
+      font-size: 20px;
+      margin-bottom: 24px;
+      opacity: 0.95;
+      line-height: 1.6;
+    }
+    
+    .stats {
+      background: rgba(255, 255, 255, 0.15);
+      padding: 24px;
+      border-radius: 16px;
+      margin-bottom: 32px;
+      backdrop-filter: blur(10px);
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-top: 16px;
+    }
+    
+    .stat-item {
+      text-align: center;
+    }
+    
+    .stat-value {
+      font-size: 36px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    
+    .stat-label {
+      font-size: 14px;
+      opacity: 0.9;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .quote {
+      font-style: italic;
+      margin-bottom: 24px;
+      font-size: 17px;
+      background: rgba(0, 0, 0, 0.25);
+      padding: 18px 24px;
+      border-radius: 16px;
+      backdrop-filter: blur(10px);
+      line-height: 1.5;
+    }
+    
+    .buttons {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    
+    .btn {
+      padding: 14px 32px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      display: inline-block;
+    }
+    
+    .btn-primary {
+      background: white;
+      color: #667eea;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    }
+    
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      backdrop-filter: blur(10px);
+    }
+    
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+    
+    .footer {
+      margin-top: 48px;
+      font-size: 14px;
+      opacity: 0.8;
+    }
+    
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      animation: fadeIn 0.3s ease;
+    }
+    
+    .modal.active {
+      display: flex;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .modal-content {
+      background: white;
+      padding: 40px;
+      border-radius: 24px;
+      max-width: 500px;
+      width: 90%;
+      color: #1d1d1f;
+      animation: slideUp 0.3s ease;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+    
+    @keyframes slideUp {
+      from { transform: translateY(50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    
+    .modal-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    
+    .modal-icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+    }
+    
+    .modal-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: #1d1d1f;
+      margin-bottom: 8px;
+    }
+    
+    .modal-subtitle {
+      color: #6e6e73;
+      font-size: 14px;
+    }
+    
+    .modal-body {
+      margin-bottom: 24px;
+    }
+    
+    .challenge-question {
+      background: #f5f5f7;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      font-size: 16px;
+      font-weight: 500;
+      color: #1d1d1f;
+      line-height: 1.6;
+    }
+    
+    .modal-input {
+      width: 100%;
+      padding: 16px;
+      border: 2px solid #d2d2d7;
+      border-radius: 12px;
+      font-size: 14px;
+      font-family: inherit;
+      margin-bottom: 16px;
+      transition: border-color 0.2s ease;
+    }
+    
+    .modal-input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    
+    .modal-textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+    
+    .phrase-to-type {
+      background: #fff3cd;
+      border: 2px solid #ffc107;
+      padding: 16px;
+      border-radius: 12px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 16px;
+      margin-bottom: 16px;
+      color: #856404;
+    }
+    
+    .modal-buttons {
+      display: flex;
+      gap: 12px;
+    }
+    
+    .modal-btn {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .modal-btn-primary {
+      background: #667eea;
+      color: white;
+    }
+    
+    .modal-btn-primary:hover:not(:disabled) {
+      background: #5568d3;
+    }
+    
+    .modal-btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .modal-btn-secondary {
+      background: #f5f5f7;
+      color: #1d1d1f;
+    }
+    
+    .modal-btn-secondary:hover {
+      background: #e8e8ed;
+    }
+    
+    .error-message {
+      color: #ff3b30;
+      font-size: 13px;
+      margin-top: 8px;
+      text-align: center;
+    }
+    
+    .warning-text {
+      background: #fff3cd;
+      border-left: 4px solid #ffc107;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      color: #856404;
+    }
+    
+    /* Todo List Styles */
+    .todo-section {
+      background: rgba(255, 255, 255, 0.15);
+      padding: 24px;
+      border-radius: 16px;
+      margin-top: 32px;
+      backdrop-filter: blur(10px);
+      text-align: left;
+    }
+    
+    .todo-input-container {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    
+    .todo-input {
+      flex: 1;
+      padding: 12px 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 10px;
+      font-size: 14px;
+      font-family: inherit;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      transition: all 0.2s ease;
+      resize: none;
+      min-height: 44px;
+      max-height: 120px;
+      overflow-y: auto;
+      line-height: 1.4;
+    }
+
+    .todo-input::placeholder {
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .todo-input:focus {
+      outline: none;
+      border-color: rgba(255, 255, 255, 0.6);
+      background: rgba(255, 255, 255, 0.25);
+    }
+    
+    .todo-add-btn {
+      padding: 12px 24px;
+      background: white;
+      color: #667eea;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .todo-add-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+    
+    .todo-list {
+      list-style: none;
+      max-height: 250px;
+      overflow-y: auto;
+    }
+    
+    .todo-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      margin-bottom: 8px;
+      transition: all 0.2s ease;
+    }
+    
+    .todo-item:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+    
+    .todo-item.completed {
+      opacity: 0.6;
+    }
+    
+    .todo-item.completed .todo-text {
+      text-decoration: line-through;
+    }
+    
+    .todo-checkbox {
+      width: 24px;
+      height: 24px;
+      border: 2px solid rgba(255, 255, 255, 0.5);
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+    
+    .todo-checkbox:hover {
+      border-color: white;
+      background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .todo-checkbox.checked {
+      background: #34c759;
+      border-color: #34c759;
+    }
+    
+    .todo-checkbox.checked::after {
+      content: "✓";
+      color: white;
+      font-size: 14px;
+      font-weight: bold;
+    }
+    
+    .todo-text {
+      flex: 1;
+      font-size: 14px;
+      word-break: break-word;
+      line-height: 1.4;
+      white-space: pre-wrap;
+    }
+
+    /* Compact view - truncate long tasks */
+    .todo-list.view-compact .todo-text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 100%;
+    }
+
+    /* Expanded view - show full task (default) */
+    .todo-list.view-expanded .todo-text {
+      white-space: pre-wrap;
+      overflow: visible;
+    }
+
+    /* Card view - each task as a card */
+    .todo-list.view-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+      max-height: 350px;
+    }
+
+    .todo-list.view-cards .todo-item {
+      flex-direction: column;
+      align-items: flex-start;
+      min-height: 80px;
+      margin-bottom: 0;
+    }
+
+    .todo-list.view-cards .todo-text {
+      margin: 8px 0;
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      white-space: normal;
+    }
+
+    .todo-list.view-cards .todo-checkbox {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+    }
+
+    .todo-list.view-cards .todo-delete {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+    }
+
+    .todo-list.view-cards .todo-item {
+      position: relative;
+      padding-left: 48px;
+      padding-right: 36px;
+    }
+
+    /* View toggle styles */
+    .view-toggle-container {
+      display: flex;
+      justify-content: flex-end;
+      gap: 4px;
+      margin-bottom: 12px;
+    }
+
+    .view-toggle-btn {
+      padding: 6px 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .view-toggle-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+    }
+
+    .view-toggle-btn.active {
+      background: rgba(255, 255, 255, 0.25);
+      border-color: rgba(255, 255, 255, 0.4);
+      color: white;
+    }
+    
+    .todo-delete {
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.5);
+      cursor: pointer;
+      font-size: 18px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+    }
+    
+    .todo-delete:hover {
+      color: #ff6b6b;
+      background: rgba(255, 107, 107, 0.2);
+    }
+    
+    .todo-empty {
+      text-align: center;
+      padding: 24px;
+      opacity: 0.8;
+    }
+    
+    .todo-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .todo-action-btn {
+      padding: 8px 16px;
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .todo-action-btn:hover {
+      background: rgba(255, 255, 255, 0.25);
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .todo-action-btn.active {
+      background: rgba(52, 199, 89, 0.3);
+      border-color: rgba(52, 199, 89, 0.6);
+    }
+    
+    .todo-points-badge {
+      background: #34c759;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-left: 8px;
+      animation: pop 0.3s ease;
+    }
+    
+    @keyframes pop {
+      0% { transform: scale(0); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+
+    /* Pause Indicator Styles */
+    .pause-indicator {
+      background: rgba(255, 215, 0, 0.15);
+      border: 1px solid rgba(255, 215, 0, 0.4);
+      padding: 16px 20px;
+      border-radius: 12px;
+      margin-top: 24px;
+      backdrop-filter: blur(10px);
+    }
+
+    .pause-indicator-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+
+    .pause-indicator-content {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .pause-indicator-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+    }
+
+    .pause-indicator-label {
+      opacity: 0.9;
+    }
+
+    .pause-indicator-value {
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 4px 12px;
+      border-radius: 6px;
+    }
+
+    .pause-indicator-tier {
+      font-size: 12px;
+      opacity: 0.8;
+      text-align: center;
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    /* Todo Edit Styles */
+    .todo-edit-input {
+      flex: 1;
+      padding: 8px 12px;
+      border: 2px solid rgba(255, 255, 255, 0.5);
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      resize: none;
+      min-height: 32px;
+      max-height: 100px;
+      line-height: 1.4;
+    }
+
+    .todo-edit-input:focus {
+      outline: none;
+      border-color: rgba(255, 255, 255, 0.8);
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    .todo-edit-actions {
+      display: flex;
+      gap: 6px;
+      margin-left: 8px;
+    }
+
+    .todo-edit-btn {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .todo-edit-save {
+      background: #34c759;
+      color: white;
+    }
+
+    .todo-edit-save:hover {
+      background: #2db84d;
+    }
+
+    .todo-edit-cancel {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+    }
+
+    .todo-edit-cancel:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .todo-text {
+      cursor: pointer;
+    }
+
+    .todo-text:hover:not(.editing) {
+      text-decoration: underline;
+      text-decoration-style: dotted;
+      text-underline-offset: 3px;
+    }
+
+    .todo-item.editing {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .todo-item.editing .todo-checkbox,
+    .todo-item.editing .todo-delete {
+      display: none;
+    }
+
+    /* Emergency Button - Factory Style */
+    .emergency-container {
+      margin-top: 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .emergency-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      opacity: 0.7;
+      font-weight: 600;
+    }
+
+    .emergency-button-wrapper {
+      position: relative;
+      width: 140px;
+      height: 140px;
+    }
+
+    /* Outer housing - like a factory button mount */
+    .emergency-housing {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
+      border-radius: 16px;
+      box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.5),
+        inset 0 2px 4px rgba(255, 255, 255, 0.1),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.3);
+      border: 3px solid #333;
+    }
+
+    /* Warning stripes */
+    .emergency-stripes {
+      position: absolute;
+      inset: 8px;
+      border-radius: 12px;
+      background: repeating-linear-gradient(
+        45deg,
+        #1a1a1a,
+        #1a1a1a 8px,
+        #ffd700 8px,
+        #ffd700 16px
+      );
+      opacity: 0.3;
+    }
+
+    /* Glass cover effect */
+    .emergency-glass {
+      position: absolute;
+      inset: 16px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 10px;
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+    }
+
+    /* The actual button */
+    .emergency-btn {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      background: linear-gradient(145deg, #ff4444, #cc0000);
+      box-shadow:
+        0 6px 0 #990000,
+        0 8px 20px rgba(0, 0, 0, 0.4),
+        inset 0 -4px 8px rgba(0, 0, 0, 0.3),
+        inset 0 4px 8px rgba(255, 255, 255, 0.2);
+      transition: all 0.1s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+    }
+
+    .emergency-btn:hover {
+      background: linear-gradient(145deg, #ff5555, #dd1111);
+      box-shadow:
+        0 6px 0 #990000,
+        0 8px 25px rgba(255, 0, 0, 0.4),
+        inset 0 -4px 8px rgba(0, 0, 0, 0.3),
+        inset 0 4px 8px rgba(255, 255, 255, 0.2);
+    }
+
+    .emergency-btn:active {
+      transform: translate(-50%, -50%) translateY(4px);
+      box-shadow:
+        0 2px 0 #990000,
+        0 4px 10px rgba(0, 0, 0, 0.4),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.3),
+        inset 0 2px 4px rgba(255, 255, 255, 0.2);
+    }
+
+    .emergency-btn-icon {
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .emergency-btn-text {
+      font-size: 9px;
+      font-weight: 800;
+      color: white;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Pulsing glow effect */
+    .emergency-btn::before {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 0, 0, 0.4) 0%, transparent 70%);
+      animation: emergencyPulse 2s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes emergencyPulse {
+      0%, 100% {
+        opacity: 0.3;
+        transform: scale(1);
+      }
+      50% {
+        opacity: 0.6;
+        transform: scale(1.1);
+      }
+    }
+
+    /* Warning text below button */
+    .emergency-warning {
+      font-size: 10px;
+      color: #ff6b6b;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 600;
+      opacity: 0.8;
+    }
+
+    /* Loading States */
+    .loading-spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .section-loading {
+      position: relative;
+      pointer-events: none;
+    }
+
+    .section-loading::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: inherit;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .loading {
+      opacity: 0.7;
+    }
+
+    .stat-value.loading {
+      min-height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- 1. Icon -->
+    <div class="icon">🛡️</div>
+
+    <!-- 2 & 4. Title and Blocked URL side-by-side -->
+    <div class="header-row">
+      <h1>Site Blocked</h1>
+      <div class="blocked-url" id="blockedUrl">Loading...</div>
+    </div>
+
+    <!-- 3. Time Message -->
+    <p class="message" id="timeMessage">This site is on your blocklist to help you stay focused and productive.</p>
+
+    <!-- 5 (was 8). Quote -->
+    <div class="quote">
+      "The successful warrior is the average man, with laser-like focus." - Bruce Lee
+    </div>
+
+    <!-- User Goal Section (hidden by default) -->
+    <div id="userGoalSection" style="display: none; background: rgba(255, 255, 255, 0.2); padding: 16px 24px; border-radius: 12px; margin: 24px 0; backdrop-filter: blur(10px);">
+      <div style="font-size: 14px; opacity: 0.9; margin-bottom: 4px;">Your Goal:</div>
+      <div style="font-size: 18px; font-weight: 600;" id="userGoal"></div>
+    </div>
+
+    <!-- 6 & 7. Stats + Pause Indicator (left) and Todo List (right) side-by-side -->
+    <div class="main-content-row">
+      <!-- LEFT COLUMN: Stats and Pause Indicator -->
+      <div class="left-column">
+        <div class="stats">
+          <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">Your Progress Today</div>
+          <div class="stats-grid">
+            <div class="stat-item">
+              <div class="stat-value" id="totalBlocks">0</div>
+              <div class="stat-label">Distractions Blocked</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value" id="currentPoints">0</div>
+              <div class="stat-label">Points</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value" id="timeSaved">0m</div>
+              <div class="stat-label">Time Saved</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pause Info Indicator (now in left column) -->
+        <div class="pause-indicator" id="pauseIndicator">
+          <div class="pause-indicator-title">⏸️ Pause Status</div>
+          <div class="pause-indicator-content">
+            <div class="pause-indicator-item">
+              <span class="pause-indicator-label">Pauses used today:</span>
+              <span class="pause-indicator-value" id="pauseCountToday">0</span>
+            </div>
+            <div class="pause-indicator-item">
+              <span class="pause-indicator-label">Current pause duration:</span>
+              <span class="pause-indicator-value" id="currentPauseDuration">20 min</span>
+            </div>
+            <div class="pause-indicator-item">
+              <span class="pause-indicator-label">Next pause duration:</span>
+              <span class="pause-indicator-value" id="nextPauseDuration">20 min</span>
+            </div>
+            <div class="pause-indicator-tier" id="pauseTierInfo">
+              3 pauses at 20 min → 3 pauses at 10 min → unlimited at 5 min
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN: Todo List -->
+      <div class="todo-section">
+        <h2 style="font-size: 24px; margin-bottom: 8px; text-align: center;">📋 What Should You Be Doing?</h2>
+        <p style="opacity: 0.9; margin-bottom: 16px; font-size: 14px; text-align: center;">Complete tasks to earn points (+10 pts each)</p>
+
+        <div class="todo-input-container">
+          <textarea
+            id="todoInput"
+            class="todo-input"
+            placeholder="Add a task you should be working on..."
+            rows="1"
+          ></textarea>
+          <button class="todo-add-btn" id="addTodoBtn">Add</button>
+        </div>
+
+        <div class="view-toggle-container">
+          <button class="view-toggle-btn active" data-view="expanded" title="Expanded View">📝 Expanded</button>
+          <button class="view-toggle-btn" data-view="compact" title="Compact View">📋 Compact</button>
+          <button class="view-toggle-btn" data-view="cards" title="Card View">🗂️ Cards</button>
+        </div>
+
+        <ul class="todo-list view-expanded" id="todoList"></ul>
+
+        <div class="todo-empty" id="todoEmpty">
+          <div style="font-size: 32px; margin-bottom: 8px;">✨</div>
+          <div>No tasks yet</div>
+          <div style="font-size: 12px; opacity: 0.8;">Add tasks to earn points!</div>
+        </div>
+
+        <!-- Import/Export/View Completed Buttons -->
+        <div class="todo-actions">
+          <button class="todo-action-btn" id="viewCompletedBtn">✅ Completed (0)</button>
+          <button class="todo-action-btn" id="exportTodosBtn">📤 Export</button>
+          <button class="todo-action-btn" id="importTodosBtn">📥 Import</button>
+          <input type="file" id="importTodosFile" accept=".json" style="display: none;">
+        </div>
+      </div>
+    </div>
+
+    <!-- 9. Navigation Buttons -->
+    <div class="buttons">
+      <button class="btn btn-primary" id="backButton">Go Back</button>
+      <button class="btn btn-secondary" id="settingsButton">Manage Blocklist</button>
+    </div>
+
+    <!-- 11. Pause Button -->
+    <div style="margin-top: 16px; display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;">
+      <button class="btn btn-secondary" id="pauseButton" style="background: rgba(255, 215, 0, 0.3); border: 2px solid rgba(255, 215, 0, 0.6);">
+        ⏸️ 20-Min Pause (Costs 25 pts)
+      </button>
+    </div>
+
+    <!-- Emergency Access Button - Factory Style -->
+    <div class="emergency-container">
+      <div class="emergency-label">Break Glass for Emergency</div>
+      <div class="emergency-button-wrapper">
+        <div class="emergency-housing"></div>
+        <div class="emergency-stripes"></div>
+        <div class="emergency-glass"></div>
+        <button class="emergency-btn" id="breakGlassButton">
+          <span class="emergency-btn-icon">🔓</span>
+          <span class="emergency-btn-text">Emergency</span>
+          <span class="emergency-btn-text">Bypass</span>
+        </button>
+      </div>
+      <div class="emergency-warning">⚠️ Resets streak • -25 points ⚠️</div>
+    </div>
+
+    <!-- 12. Footer -->
+    <div class="footer">
+      Focus Guard - Stay productive, stay focused
+    </div>
+  </div>
+  
+  <!-- Break Glass Modal -->
+  <div class="modal" id="breakGlassModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-icon">🚨</div>
+        <div class="modal-title">Emergency Access</div>
+        <div class="modal-subtitle">Think carefully before proceeding</div>
+      </div>
+      
+      <div class="modal-body">
+        <div class="warning-text">
+          Warning: Bypassing blocks will reset your streak and reduce your productivity score by 25 points.
+        </div>
+        
+        <div class="phrase-to-type" id="phraseToType">I am wasting my time</div>
+        
+        <input 
+          type="text" 
+          class="modal-input" 
+          id="phraseInput" 
+          placeholder="Type the phrase exactly as shown above"
+          autocomplete="off"
+        >
+        
+        <div class="error-message" id="phraseError"></div>
+      </div>
+      
+      <div class="modal-buttons">
+        <button class="modal-btn modal-btn-secondary" id="cancelBreakGlass">Cancel</button>
+        <button class="modal-btn modal-btn-primary" id="confirmBreakGlass" disabled>Proceed Anyway</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Challenge Question Modal -->
+  <div class="modal" id="challengeModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-icon">🤔</div>
+        <div class="modal-title">Quick Reflection</div>
+        <div class="modal-subtitle">Before you proceed...</div>
+      </div>
+      
+      <div class="modal-body">
+        <div class="challenge-question" id="challengeQuestion">
+          Why do you need to access this site right now?
+        </div>
+        
+        <textarea 
+          class="modal-input modal-textarea" 
+          id="challengeAnswer" 
+          placeholder="Type your honest answer here..."
+        ></textarea>
+        
+        <div class="warning-text">
+          Your answer will be logged. Be honest with yourself.
+        </div>
+      </div>
+      
+      <div class="modal-buttons">
+        <button class="modal-btn modal-btn-secondary" id="cancelChallenge">Go Back</button>
+        <button class="modal-btn modal-btn-primary" id="confirmChallenge">Continue to Site</button>
+      </div>
+    </div>
+  </div>
+  
+  <script src="blocked.js"></script>
+</body>
+</html>

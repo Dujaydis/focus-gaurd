@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Focus Guard - Settings</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      background: #f5f5f7;
+      min-height: 100vh;
+    }
+    
+    .header {
+      background: white;
+      border-bottom: 1px solid #d2d2d7;
+      padding: 24px 0;
+      margin-bottom: 32px;
+    }
+    
+    .import-export-buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+    }
+    
+    .top-sites-list {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    
+    .top-site-item {
+      padding: 16px;
+      border-bottom: 1px solid #f5f5f7;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .top-site-item:last-child {
+      border-bottom: none;
+    }
+    
+    .top-site-domain {
+      font-weight: 500;
+    }
+    
+    .top-site-count {
+      background: #f5f5f7;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #667eea;
+    }
+    
+    .reset-button {
+      margin-top: 16px;
+    }
+    
+    .badge-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+    
+    .badge-item {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .badge-item.locked {
+      background: #e8e8ed;
+      color: #86868b;
+    }
+    
+    .badge-icon {
+      font-size: 48px;
+      margin-bottom: 8px;
+    }
+    
+    .badge-name {
+      font-weight: 600;
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+    
+    .badge-description {
+      font-size: 12px;
+      opacity: 0.9;
+    }
+    
+    .bypass-list {
+      max-height: 400px;
+      overflow-y: auto;
+      margin-top: 16px;
+    }
+    
+    .bypass-item {
+      background: white;
+      border: 1px solid #d2d2d7;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+    
+    .bypass-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    
+    .bypass-domain {
+      font-weight: 600;
+      color: #1d1d1f;
+    }
+    
+    .bypass-time {
+      font-size: 12px;
+      color: #86868b;
+    }
+    
+    .bypass-reason {
+      color: #6e6e73;
+      font-size: 14px;
+      font-style: italic;
+      margin-top: 8px;
+      padding: 8px;
+      background: #f5f5f7;
+      border-radius: 6px;
+    }
+    
+    .empty-badges {
+      text-align: center;
+      padding: 40px 20px;
+      color: #86868b;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="container">
+      <h1>Focus Guard Settings</h1>
+      <p class="text-muted">Manage your blocklist and view productivity statistics</p>
+    </div>
+  </div>
+  
+  <div class="container">
+    <!-- Weekly Report Card -->
+    <div class="section">
+      <h2>Weekly Report Card</h2>
+      
+      <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;">
+        <div style="text-align: center; padding: 20px 0;">
+          <div style="font-size: 48px; margin-bottom: 16px;" id="reportEmoji">🎯</div>
+          <div style="font-size: 24px; font-weight: 700; margin-bottom: 8px;" id="reportMessage">Loading...</div>
+          <div style="font-size: 14px; opacity: 0.9;" id="reportWeek">Week of ...</div>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin-top: 24px;">
+          <div style="background: rgba(255,255,255,0.2); padding: 20px; border-radius: 12px; text-align: center; backdrop-filter: blur(10px);">
+            <div style="font-size: 32px; font-weight: 700;" id="weekBlocks">0</div>
+            <div style="font-size: 12px; opacity: 0.9; margin-top: 4px;">Blocks This Week</div>
+            <div style="font-size: 14px; font-weight: 600; margin-top: 8px; opacity: 0.8;" id="weekBlocksChange">--</div>
+          </div>
+          
+          <div style="background: rgba(255,255,255,0.2); padding: 20px; border-radius: 12px; text-align: center; backdrop-filter: blur(10px);">
+            <div style="font-size: 32px; font-weight: 700;" id="weekTimeSaved">0m</div>
+            <div style="font-size: 12px; opacity: 0.9; margin-top: 4px;">Time Saved</div>
+            <div style="font-size: 14px; font-weight: 600; margin-top: 8px; opacity: 0.8;" id="weekTimeSavedChange">--</div>
+          </div>
+          
+          <div style="background: rgba(255,255,255,0.2); padding: 20px; border-radius: 12px; text-align: center; backdrop-filter: blur(10px);">
+            <div style="font-size: 32px; font-weight: 700;" id="weekStreak">0</div>
+            <div style="font-size: 12px; opacity: 0.9; margin-top: 4px;">Current Streak</div>
+            <div style="font-size: 14px; font-weight: 600; margin-top: 8px; opacity: 0.8;">Days</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Time Saved Totals -->
+      <div class="card">
+        <h3>Time Saved Tracker</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 16px;">
+          <div style="background: #f5f5f7; padding: 20px; border-radius: 12px; text-align: center;">
+            <div style="font-size: 14px; color: #6e6e73; margin-bottom: 8px;">This Week</div>
+            <div style="font-size: 36px; font-weight: 700; color: #667eea;" id="totalWeekTimeSaved">0m</div>
+          </div>
+          
+          <div style="background: #f5f5f7; padding: 20px; border-radius: 12px; text-align: center;">
+            <div style="font-size: 14px; color: #6e6e73; margin-bottom: 8px;">All Time</div>
+            <div style="font-size: 36px; font-weight: 700; color: #34c759;" id="totalAllTimeSaved">0h</div>
+          </div>
+        </div>
+        
+        <div style="background: #fff3cd; border: 2px solid #ffc107; padding: 16px; border-radius: 12px; margin-top: 16px; color: #856404;">
+          <div style="font-weight: 600; margin-bottom: 8px;">Impact Calculator</div>
+          <div style="font-size: 14px;" id="impactMessage">Each block saves approximately 7 minutes of potential distraction time.</div>
+        </div>
+      </div>
+      
+      <!-- User Goal Setting -->
+      <div class="card">
+        <h3>Set Your Goal</h3>
+        <p class="text-muted text-small">Your goal will be displayed on block pages to keep you motivated</p>
+        <div style="margin-top: 16px; display: flex; gap: 12px;">
+          <input 
+            type="text" 
+            id="userGoalInput" 
+            placeholder="e.g., Finish project report by Friday"
+            style="flex: 1; padding: 12px; border: 1px solid #d2d2d7; border-radius: 10px; font-size: 14px;"
+            maxlength="100"
+          >
+          <button class="btn-primary" id="saveGoalButton">Save Goal</button>
+        </div>
+        <div id="currentGoal" style="margin-top: 12px; display: none;">
+          <div style="font-size: 12px; color: #6e6e73; margin-bottom: 4px;">Current Goal:</div>
+          <div style="font-weight: 500; color: #1d1d1f;" id="currentGoalText"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Productivity Section -->
+    <div class="section">
+      <h2>Productivity Dashboard</h2>
+      
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="productivityScore">0</div>
+          <div class="stat-label">Productivity Score</div>
+        </div>
+        <div class="stat-card secondary">
+          <div class="stat-value" id="currentStreak">0</div>
+          <div class="stat-label">Current Streak (Days)</div>
+        </div>
+        <div class="stat-card" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+          <div class="stat-value" id="longestStreak">0</div>
+          <div class="stat-label">Longest Streak</div>
+        </div>
+      </div>
+      
+      <!-- Badges -->
+      <div class="card">
+        <h3>Achievements & Badges</h3>
+        <div id="badgesList"></div>
+      </div>
+      
+      <!-- Bypass Log -->
+      <div class="card">
+        <h3>Bypass History</h3>
+        <p class="text-muted text-small">Track when and why you bypassed blocks</p>
+        <div id="bypassLog"></div>
+      </div>
+    </div>
+    
+    <!-- Statistics Section -->
+    <div class="section">
+      <h2>Blocking Statistics</h2>
+      
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="totalBlocks">0</div>
+          <div class="stat-label">Total Blocks</div>
+        </div>
+        <div class="stat-card secondary">
+          <div class="stat-value" id="uniqueSites">0</div>
+          <div class="stat-label">Unique Sites</div>
+        </div>
+      </div>
+      
+      <div class="card">
+        <h3>Most Blocked Sites</h3>
+        <div id="topSitesList"></div>
+        <button class="btn-danger reset-button" id="resetStatsButton">Reset Statistics</button>
+      </div>
+    </div>
+    
+    <!-- Blocklist Management Section -->
+    <div class="section">
+      <h2>Blocklist Management</h2>
+      
+      <div class="card">
+        <h3>Import / Export Blocklist</h3>
+        <p class="text-muted text-small">Backup your blocklist or share it across devices</p>
+        
+        <div class="import-export-buttons">
+          <button class="btn-secondary" id="exportButton">Export Blocklist</button>
+          <button class="btn-secondary" id="importButton">Import Blocklist</button>
+        </div>
+        
+        <input type="file" id="importFile" accept=".json" style="display: none;">
+      </div>
+      
+      <div class="card">
+        <h3>Import / Export Tasks</h3>
+        <p class="text-muted text-small">Backup your todo list or transfer it to another device</p>
+
+        <div class="import-export-buttons">
+          <button class="btn-secondary" id="exportTodosButton">Export Tasks</button>
+          <button class="btn-secondary" id="importTodosButton">Import Tasks</button>
+        </div>
+
+        <input type="file" id="importTodosFile" accept=".json" style="display: none;">
+
+        <div id="todoStats" style="margin-top: 16px; padding: 12px; background: #f5f5f7; border-radius: 8px;">
+          <span class="text-muted text-small">Total tasks: </span>
+          <span id="totalTodosCount">0</span>
+          <span class="text-muted text-small"> | Completed: </span>
+          <span id="completedTodosCount">0</span>
+        </div>
+      </div>
+
+      <!-- Firebase Sync Section -->
+      <div class="card" id="syncCard">
+        <h3>📱 Mobile Sync</h3>
+        <p class="text-muted text-small">Sync your todos with the mobile web app for real-time access from any device</p>
+
+        <div id="syncDisabled" style="margin-top: 16px;">
+          <div style="display: flex; gap: 12px; align-items: flex-end;">
+            <div style="flex: 1;">
+              <label style="font-size: 12px; color: #6e6e73; display: block; margin-bottom: 4px;">Sync Passphrase</label>
+              <input
+                type="password"
+                id="syncPassphrase"
+                placeholder="Enter a secret passphrase"
+                style="width: 100%; padding: 12px; border: 1px solid #d2d2d7; border-radius: 10px; font-size: 14px;"
+              >
+            </div>
+            <button class="btn-primary" id="enableSyncBtn">Enable Sync</button>
+          </div>
+          <p class="text-muted text-small" style="margin-top: 8px;">
+            Use the same passphrase on all devices to sync your todos.
+          </p>
+        </div>
+
+        <div id="syncEnabled" style="display: none; margin-top: 16px;">
+          <div style="display: flex; align-items: center; gap: 12px; padding: 12px; background: #d4edda; border-radius: 8px; margin-bottom: 12px;">
+            <span style="color: #155724; font-size: 20px;">✅</span>
+            <div>
+              <div style="font-weight: 600; color: #155724;">Sync Enabled</div>
+              <div style="font-size: 12px; color: #155724;">Your todos are syncing across devices</div>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 12px;">
+            <button class="btn-secondary" id="forceSyncBtn">Force Sync Now</button>
+            <button class="btn-danger" id="disableSyncBtn">Disable Sync</button>
+          </div>
+        </div>
+
+        <div style="margin-top: 16px; padding: 12px; background: #e7f3ff; border-radius: 8px;">
+          <div style="font-weight: 600; color: #0056b3; margin-bottom: 4px;">📱 Access from your phone:</div>
+          <div style="font-size: 13px; color: #0056b3;">
+            Open the web app on your phone and enter the same passphrase to sync.
+            <br><br>
+            <strong>Web App URL:</strong> <span id="webAppUrl" style="word-break: break-all;">See SETUP.md for deployment instructions</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card">
+        <h3>Current Blocklist</h3>
+        <p class="text-muted text-small" id="blocklistCount">0 sites blocked</p>
+        <div id="fullBlocklist"></div>
+      </div>
+    </div>
+    
+    <!-- About Section -->
+    <div class="section">
+      <div class="card">
+        <h3>About Focus Guard</h3>
+        <p class="text-muted text-small">
+          Focus Guard helps you stay productive by blocking distracting websites. 
+          Use wildcards (*.domain.com) to block entire domains and subdomains.
+        </p>
+        <p class="text-muted text-small" style="margin: 0;">
+          <strong>Version:</strong> 2.0.0
+        </p>
+      </div>
+    </div>
+  </div>
+  
+  <script src="options.js"></script>
+</body>
+</html>

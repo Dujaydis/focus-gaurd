@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Build output
+dist/
+build/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment and config files with secrets
+.env
+.env.local
+.env.*.local
+
+# Note: firebase-config.js and web-app/config.js contain your Firebase credentials
+# They are NOT in .gitignore so the extension works, but you should:
+# 1. Use Firebase security rules to protect your data
+# 2. Consider using environment variables in production
+
+# Temporary files
+*.tmp
+*.temp
+
+# Packed extension
+*.crx
+*.pem
+*.zip
